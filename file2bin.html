@@ -683,18 +683,31 @@ header {
   <!-- Decode Panel -->
   <div class="panel" id="panel-decode">
 
-    <div class="dropzone" id="drop-decode">
+    <div class="dropzone" id="drop-decode" aria-live="polite" aria-atomic="true">
       <input type="file" accept=".bin" onchange="handleDecode(this.files[0])">
-      <div class="dz-icon">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-          <rect x="2" y="1.5" width="10" height="13" rx="1.5" stroke="#787774" stroke-width="1.4"/>
-          <path d="M5 5.5h4M5 8h4M5 10.5h2" stroke="#787774" stroke-width="1.2" stroke-linecap="round"/>
-          <circle cx="13.5" cy="13.5" r="3" stroke="#787774" stroke-width="1.4"/>
-          <path d="M13.5 12v3M12 13.5l1.5 1.5 1.5-1.5" stroke="#787774" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+      <div class="dz-empty">
+        <div class="dz-icon">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <rect x="2" y="1.5" width="10" height="13" rx="1.5" stroke="#787774" stroke-width="1.4"/>
+            <path d="M5 5.5h4M5 8h4M5 10.5h2" stroke="#787774" stroke-width="1.2" stroke-linecap="round"/>
+            <circle cx="13.5" cy="13.5" r="3" stroke="#787774" stroke-width="1.4"/>
+            <path d="M13.5 12v3M12 13.5l1.5 1.5 1.5-1.5" stroke="#787774" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="dz-title">点击上传或拖入 .bin 文件</div>
+        <div class="dz-sub">仅支持由本工具生成的 .bin 文件，可还原图片或 ZIP</div>
       </div>
-      <div class="dz-title">点击上传或拖入 .bin 文件</div>
-      <div class="dz-sub">仅支持由本工具生成的 .bin 文件，可还原图片或 ZIP</div>
+      <div class="dz-file" id="dec-file-state">
+        <div class="dz-icon">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M4 9l3 3 7-7" stroke="#0f7b6c" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="dz-file-meta">
+          <div class="dz-file-name" id="dec-drop-name">—</div>
+          <div class="dz-file-sub" id="dec-drop-sub">已读取，点击可重新选择文件</div>
+        </div>
+      </div>
     </div>
 
     <div class="pw-section" id="dec-pw-section" style="display:none;">
@@ -826,16 +839,26 @@ function revokeObjectUrl(url) {
   if(url) URL.revokeObjectURL(url)
 }
 
-function updateEncodeDropzone(file) {
-  const zone = document.getElementById('drop-encode')
+function updateDropzoneState(zoneId, nameId, subId, file, subtitlePrefix='已读取') {
+  const zone = document.getElementById(zoneId)
   if(!zone) return
   if(!file) {
     zone.classList.remove('has-file')
     return
   }
   zone.classList.add('has-file')
-  document.getElementById('enc-drop-name').textContent = file.name
-  document.getElementById('enc-drop-sub').textContent = `已读取 · ${formatSize(file.size)} · 点击可重新选择文件`
+  const nameEl = document.getElementById(nameId)
+  const subEl = document.getElementById(subId)
+  if(nameEl) nameEl.textContent = file.name
+  if(subEl) subEl.textContent = `${subtitlePrefix} · ${formatSize(file.size)} · 点击可重新选择文件`
+}
+
+function updateEncodeDropzone(file) {
+  updateDropzoneState('drop-encode', 'enc-drop-name', 'enc-drop-sub', file, '已读取')
+}
+
+function updateDecodeDropzone(file) {
+  updateDropzoneState('drop-decode', 'dec-drop-name', 'dec-drop-sub', file, '已载入')
 }
 
 // ── Encode ───────────────────────────────────────────────────────────────────
@@ -958,7 +981,11 @@ function decodePlain(bytes, offset) {
 }
 
 async function handleDecode(file) {
-  if(!file) return
+  if(!file) {
+    updateDecodeDropzone(null)
+    return
+  }
+  updateDecodeDropzone(file)
   const buf = await file.arrayBuffer()
   const bytes = new Uint8Array(buf)
   if(bytes.length < 4){showStatus('dec','无效文件：数据过短','err'); return}
