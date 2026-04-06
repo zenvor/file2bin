@@ -813,18 +813,22 @@ async function handleEncode(file) {
   document.getElementById('enc-name').textContent    = encOrigName
   document.getElementById('enc-size').textContent    = formatSize(file.size)
   document.getElementById('enc-type').textContent    = isZip ? 'application/zip' : encMime
-  document.getElementById('enc-outname').textContent = base+'_encrypted.bin'
+  document.getElementById('enc-outname').textContent = base + (pw ? '_encrypted' : '') + '.bin'
   document.getElementById('enc-hex').textContent     = toHex(out)
   document.getElementById('enc-card').classList.add('visible')
   document.getElementById('enc-btn').disabled = false
   showStatus('enc', pw ? '已加密打包，点击下载 .bin 文件' : '已读取，点击下载 .bin 文件', 'ok')
 }
 
-function downloadBin(){
+async function downloadBin(){
+  if(!encFile) return
+  // Always re-encode with the current password at download time to avoid
+  // race conditions where the change event fires before async encryption finishes
+  await handleEncode(encFile)
   if(!encBuffer) return
   const a = document.createElement('a')
   a.href = URL.createObjectURL(new Blob([encBuffer],{type:'application/octet-stream'}))
-  a.download = encOrigName.replace(/\.[^.]+$/,'')+'_encrypted.bin'
+  a.download = document.getElementById('enc-outname').textContent
   a.click()
 }
 
@@ -920,11 +924,6 @@ function downloadImg(){
     const f=e.dataTransfer.files[0]; if(!f) return
     id==='drop-encode' ? handleEncode(f) : handleDecode(f)
   })
-})
-
-// Re-encode when password changes (if file already loaded)
-document.getElementById('enc-pw').addEventListener('change',()=>{
-  if(encFile) handleEncode(encFile)
 })
 
 // Enter key triggers decrypt
