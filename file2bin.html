@@ -706,9 +706,10 @@ header {
 <script>
 const MAGIC     = new Uint8Array([0x49,0x4D,0x42,0x01]) // plain
 const MAGIC_ENC = new Uint8Array([0x49,0x4D,0x42,0x02]) // AES-GCM encrypted
-let encBuffer=null,encMime=null,encOrigName=null,encFile=null
-let decBlob=null,decMime=null,decOrigName=null
+let encBuffer=null,encFile=null
+let decBlob=null,decOrigName=null
 let pendingDecBytes=null
+let encPreviewUrl=null,decPreviewUrl=null,encDownloadUrl=null,decDownloadUrl=null
 
 // ── Crypto helpers ──────────────────────────────────────────────────────────
 
@@ -757,6 +758,10 @@ function showStatus(panel, msg, type) {
   txt.textContent = msg
 }
 
+function revokeObjectUrl(url) {
+  if(url) URL.revokeObjectURL(url)
+}
+
 // ── Encode ───────────────────────────────────────────────────────────────────
 
 async function handleEncode(file) {
@@ -764,9 +769,9 @@ async function handleEncode(file) {
   encFile = file
   const buf = await file.arrayBuffer()
   const bytes = new Uint8Array(buf)
-  encOrigName = file.name
+  const encOrigName = file.name
   const isZip = encOrigName.toLowerCase().endsWith('.zip')
-  encMime = isZip ? 'application/zip' : (file.type || 'application/octet-stream')
+  const encMime = isZip ? 'application/zip' : (file.type || 'application/octet-stream')
   const mimeB = new TextEncoder().encode(encMime)
   const nameB = new TextEncoder().encode(encOrigName)
   const pw = document.getElementById('enc-pw').value.trim()
@@ -807,8 +812,14 @@ async function handleEncode(file) {
 
   encBuffer = out
   const prev = document.getElementById('enc-preview')
+  revokeObjectUrl(encPreviewUrl)
+  encPreviewUrl = null
   if(isZip){prev.style.display='none'; prev.src=''}
-  else{prev.src=URL.createObjectURL(file); prev.style.display='block'}
+  else{
+    encPreviewUrl = URL.createObjectURL(file)
+    prev.src = encPreviewUrl
+    prev.style.display = 'block'
+  }
   const base = encOrigName.replace(/\.[^.]+$/,'')
   document.getElementById('enc-name').textContent    = encOrigName
   document.getElementById('enc-size').textContent    = formatSize(file.size)
@@ -827,7 +838,9 @@ async function downloadBin(){
   await handleEncode(encFile)
   if(!encBuffer) return
   const a = document.createElement('a')
-  a.href = URL.createObjectURL(new Blob([encBuffer],{type:'application/octet-stream'}))
+  revokeObjectUrl(encDownloadUrl)
+  encDownloadUrl = URL.createObjectURL(new Blob([encBuffer],{type:'application/octet-stream'}))
+  a.href = encDownloadUrl
   a.download = document.getElementById('enc-outname').textContent
   a.click()
 }
@@ -836,16 +849,25 @@ async function downloadBin(){
 
 function decodePlain(bytes, offset) {
   let o = offset
+  if(o+2>bytes.length) throw new Error('invalid header: missing mime length')
   const mimeLen = (bytes[o]<<8)|bytes[o+1]; o+=2
+  if(o+mimeLen+2>bytes.length) throw new Error('invalid header: invalid mime length')
   const mimeStr = new TextDecoder().decode(bytes.slice(o,o+mimeLen)); o+=mimeLen
   const nameLen = (bytes[o]<<8)|bytes[o+1]; o+=2
+  if(o+nameLen>bytes.length) throw new Error('invalid header: invalid filename length')
   const origName = new TextDecoder().decode(bytes.slice(o,o+nameLen)); o+=nameLen
   const data = bytes.slice(o)
-  decMime=mimeStr; decOrigName=origName
+  decOrigName=origName
   decBlob = new Blob([data],{type:mimeStr})
   const prev = document.getElementById('dec-preview')
+  revokeObjectUrl(decPreviewUrl)
+  decPreviewUrl = null
   if(mimeStr==='application/zip'){prev.style.display='none'; prev.src=''}
-  else{prev.src=URL.createObjectURL(decBlob); prev.style.display='block'}
+  else{
+    decPreviewUrl = URL.createObjectURL(decBlob)
+    prev.src = decPreviewUrl
+    prev.style.display = 'block'
+  }
   document.getElementById('dec-type').textContent    = mimeStr
   document.getElementById('dec-origname').textContent = origName
   document.getElementById('dec-imgsize').textContent  = formatSize(data.length)
@@ -858,6 +880,7 @@ async function handleDecode(file) {
   if(!file) return
   const buf = await file.arrayBuffer()
   const bytes = new Uint8Array(buf)
+  if(bytes.length < 4){showStatus('dec','无效文件：数据过短','err'); return}
   // Reset
   pendingDecBytes = null; decBlob = null
   document.getElementById('dec-pw-section').style.display = 'none'
@@ -870,9 +893,17 @@ async function handleDecode(file) {
 
   document.getElementById('dec-size').textContent = formatSize(file.size)
 
-  if(isPlain) { decodePlain(bytes, 4); return }
+  if(isPlain) {
+    try {
+      decodePlain(bytes, 4)
+    } catch {
+      showStatus('dec','文件结构损坏，无法还原','err')
+    }
+    return
+  }
 
   // Encrypted file — show password prompt
+  if(bytes.length < 33){showStatus('dec','无效文件：加密数据不完整','err'); return}
   pendingDecBytes = bytes
   document.getElementById('dec-pw-section').style.display = 'flex'
   document.getElementById('dec-pw').value = ''
@@ -907,7 +938,9 @@ async function doDecrypt() {
 function downloadImg(){
   if(!decBlob) return
   const a = document.createElement('a')
-  a.href = URL.createObjectURL(decBlob)
+  revokeObjectUrl(decDownloadUrl)
+  decDownloadUrl = URL.createObjectURL(decBlob)
+  a.href = decDownloadUrl
   a.download = decOrigName || 'restored_file'
   a.click()
 }
