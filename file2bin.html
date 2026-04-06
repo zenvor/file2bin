@@ -970,16 +970,14 @@ function applyI18n() {
   document.querySelectorAll('[data-i18n-aria-label]').forEach(el => {
     el.setAttribute('aria-label', t(el.dataset.i18nAriaLabel))
   })
-  const activeStatus = document.getElementById('enc-status-text')
-  if (activeStatus && activeStatus.dataset.i18nKey) {
-    const vars = activeStatus.dataset.i18nVars ? JSON.parse(activeStatus.dataset.i18nVars) : {}
-    activeStatus.textContent = t(activeStatus.dataset.i18nKey, vars)
-  }
-  const decStatus = document.getElementById('dec-status-text')
-  if (decStatus && decStatus.dataset.i18nKey) {
-    const vars = decStatus.dataset.i18nVars ? JSON.parse(decStatus.dataset.i18nVars) : {}
-    decStatus.textContent = t(decStatus.dataset.i18nKey, vars)
-  }
+  const statusIds = ['enc-status-text', 'dec-status-text']
+  statusIds.forEach(id => {
+    const statusEl = document.getElementById(id)
+    if (statusEl && statusEl.dataset.i18nKey) {
+      const vars = statusEl.dataset.i18nVars ? JSON.parse(statusEl.dataset.i18nVars) : {}
+      statusEl.textContent = t(statusEl.dataset.i18nKey, vars)
+    }
+  })
   document.querySelectorAll('.locale-btn').forEach(btn => {
     btn.classList.toggle('active', btn.id === `lang-${currentLocale}`)
   })
