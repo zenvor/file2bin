@@ -864,6 +864,8 @@ function decodePlain(bytes, offset) {
   const prev = document.getElementById('dec-preview')
   revokeObjectUrl(decPreviewUrl)
   decPreviewUrl = null
+  revokeObjectUrl(decDownloadUrl)
+  decDownloadUrl = null
   if(mimeStr==='application/zip'){prev.style.display='none'; prev.src=''}
   else{
     decPreviewUrl = URL.createObjectURL(decBlob)
