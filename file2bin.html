@@ -607,7 +607,7 @@ header {
   <!-- Encode Panel -->
   <div class="panel active" id="panel-encode">
 
-    <div class="dropzone" id="drop-encode">
+    <div class="dropzone" id="drop-encode" aria-live="polite" aria-atomic="true">
       <input type="file" accept="image/*,.zip,application/zip" onchange="handleEncode(this.files[0])">
       <div class="dz-empty">
         <div class="dz-icon">
@@ -619,7 +619,7 @@ header {
         <div class="dz-title">点击上传或拖入文件</div>
         <div class="dz-sub">支持图片（JPG、PNG、WebP 等）和 ZIP 压缩包</div>
       </div>
-      <div class="dz-file" id="enc-file-state" aria-live="polite">
+      <div class="dz-file" id="enc-file-state">
         <div class="dz-icon">
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
             <path d="M4 9l3 3 7-7" stroke="#0f7b6c" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
