@@ -1,12 +1,12 @@
 # file2bin
 
-`file2bin` is a single-file web app (`file2bin.html`) that converts files to and from `.bin` (hex), with optional browser-side encryption.
+`file2bin` is a single-file web app (`index.html`) that converts files to and from `.bin` (hex), with optional browser-side encryption.
 
 Current UI languages: Chinese (zh-CN) and English (en-US).
 
 ## Features
 
-- Single-file app: HTML, CSS, and JavaScript are all in `file2bin.html`
+- Single-file app: HTML, CSS, and JavaScript are all in `index.html`
 - Local processing in the browser (no backend required)
 - Built-in multilingual UI (`zh-CN` and `en-US`)
 - Two-way conversion:
@@ -34,7 +34,7 @@ Current UI languages: Chinese (zh-CN) and English (en-US).
 
 ### Option 1: Open directly
 
-Open `file2bin.html` in your browser.
+Open `index.html` in your browser.
 
 > Note: On `file://`, encryption/decryption may be unavailable in some browsers because `crypto.subtle` requires a Secure Context.
 
@@ -44,7 +44,7 @@ Open `file2bin.html` in your browser.
 python3 -m http.server 8080
 ```
 
-Then visit <http://localhost:8080/file2bin.html>.
+Then visit <http://localhost:8080/>.
 
 ## Security & Privacy Notes
 
@@ -61,7 +61,7 @@ Then visit <http://localhost:8080/file2bin.html>.
 
 ```text
 .
-├── file2bin.html   # main app (runtime file)
+├── index.html      # main app (runtime file)
 ├── README.md
 ├── .gitignore
 └── LICENSE
