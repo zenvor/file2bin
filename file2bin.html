@@ -103,7 +103,7 @@ header {
   gap: 2px;
   background: var(--bg-subtle);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 3px;
   margin-bottom: 20px;
 }
@@ -113,10 +113,10 @@ header {
   padding: 7px 12px;
   background: none;
   border: none;
-  border-radius: 7px;
+  border-radius: 8px;
   font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 600;
   color: var(--text-2);
   cursor: pointer;
   transition: all 0.12s;
@@ -293,7 +293,7 @@ header {
   font-weight: 500;
   color: var(--green);
   background: var(--green-bg);
-  border: 1px solid #b8ede5;
+  border: 1px solid rgba(26,174,57,0.25);
   border-radius: 9999px;
   padding: 1px 7px;
 }
@@ -409,11 +409,11 @@ header {
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: opacity 0.12s;
+  transition: background 0.12s, transform 0.12s, opacity 0.12s;
 }
 
-.btn:hover { opacity: 0.85; }
-.btn:active { background: var(--accent-active); }
+.btn:hover { background: var(--accent-active); opacity: 1; }
+.btn:active { background: var(--accent-active); transform: scale(0.9); }
 .btn:disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
 
 /* ── Status ── */
@@ -560,11 +560,11 @@ header {
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: opacity 0.12s;
+  transition: background 0.12s, transform 0.12s, opacity 0.12s;
   white-space: nowrap;
 }
-.pw-btn:hover { opacity: 0.9; }
-.pw-btn:active { background: var(--accent-active); }
+.pw-btn:hover { background: var(--accent-active); opacity: 1; }
+.pw-btn:active { background: var(--accent-active); transform: scale(0.9); }
 .pw-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 @media (max-width: 480px) {
