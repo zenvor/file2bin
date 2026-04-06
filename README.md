@@ -2,17 +2,28 @@
 
 `file2bin` is a single-file web app (`file2bin.html`) that converts files to and from `.bin` (hex), with optional browser-side encryption.
 
-Current UI language: Chinese (zh-CN).
+Current UI languages: Chinese (zh-CN) and English (en-US).
 
 ## Features
 
 - Single-file app: HTML, CSS, and JavaScript are all in `file2bin.html`
 - Local processing in the browser (no backend required)
+- Built-in multilingual UI (`zh-CN` and `en-US`)
 - Two-way conversion:
   - file → `.bin` (hex)
   - `.bin` (hex) → file
 - Optional encryption via Web Crypto API (`aes-256-gcm` + `pbkdf2`)
 - Mobile-first layout (max content width: 600px)
+
+## Internationalization (i18n)
+
+- Runtime i18n is implemented with a lightweight in-file dictionary (`messages`) and translation helper (`t()`), with no build step.
+- Locale detection priority:
+  1. `?lang=...` in URL
+  2. `localStorage.file2bin_locale`
+  3. `navigator.language`
+  4. fallback to `zh-CN`
+- You can switch language in the page header and the choice is persisted in local storage.
 
 ## Requirements
 
