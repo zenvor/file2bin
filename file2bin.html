@@ -51,6 +51,13 @@ header {
   margin-bottom: 36px;
 }
 
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .breadcrumb {
   display: flex;
   align-items: center;
@@ -63,6 +70,34 @@ header {
 
 .breadcrumb span { color: var(--text-3); }
 .breadcrumb a { color: var(--text-2); text-decoration: none; }
+
+.locale-switch {
+  display: inline-flex;
+  gap: 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 2px;
+  background: var(--bg-subtle);
+}
+
+.locale-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.locale-btn:hover { color: var(--text); background: var(--bg-hover); }
+.locale-btn.active {
+  color: var(--text);
+  background: var(--bg);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
 
 .page-icon {
   width: 40px;
@@ -578,14 +613,20 @@ header {
 
   <!-- Header -->
   <header>
-    <div class="breadcrumb">
-      <span>工具</span>
+    <div class="header-top">
+      <div class="breadcrumb">
+      <span data-i18n="breadcrumb.tools">工具</span>
       <span>/</span>
       <span>FILE·BIN</span>
+      </div>
+      <div class="locale-switch" role="group" data-i18n-aria-label="aria.language_switch" aria-label="language switch">
+        <button class="locale-btn" id="lang-zh-CN" onclick="setLocale('zh-CN')" data-i18n="lang.zh">中文</button>
+        <button class="locale-btn" id="lang-en-US" onclick="setLocale('en-US')" data-i18n="lang.en">EN</button>
+      </div>
     </div>
     <div class="page-icon">🔐</div>
     <div class="page-title">FILE·BIN</div>
-    <div class="page-desc">将文件转为二进制 .bin 格式保存，随时还原。全程本地处理，零上传。</div>
+    <div class="page-desc" data-i18n="header.desc">将文件转为二进制 .bin 格式保存，随时还原。全程本地处理，零上传。</div>
   </header>
 
   <div class="divider"></div>
@@ -597,14 +638,14 @@ header {
         <path d="M6.5 1v8M3 6l3.5 3.5L10 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
         <path d="M1 10.5h11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
       </svg>
-      文件 → .bin 转换
+      <span data-i18n="tab.encode">文件 → .bin 转换</span>
     </button>
     <button class="tab" id="tab-dec" onclick="switchTab('decode')">
       <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
         <path d="M6.5 12V4M3 7l3.5-3.5L10 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
         <path d="M1 2.5h11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
       </svg>
-      .bin → 文件 还原
+      <span data-i18n="tab.decode">.bin → 文件 还原</span>
     </button>
   </div>
 
@@ -620,8 +661,8 @@ header {
             <path d="M2 13.5v.5a1 1 0 001 1h12a1 1 0 001-1v-.5" stroke="#787774" stroke-width="1.4" stroke-linecap="round"/>
           </svg>
         </div>
-        <div class="dz-title">点击上传或拖入文件</div>
-        <div class="dz-sub">支持图片（JPG、PNG、WebP 等）和 ZIP 压缩包</div>
+        <div class="dz-title" data-i18n="encode.drop.title">点击上传或拖入文件</div>
+        <div class="dz-sub" data-i18n="encode.drop.sub">支持图片（JPG、PNG、WebP 等）和 ZIP 压缩包</div>
       </div>
       <div class="dz-file" id="enc-file-state">
         <div class="dz-icon">
@@ -631,7 +672,7 @@ header {
         </div>
         <div class="dz-file-meta">
           <div class="dz-file-name" id="enc-drop-name">—</div>
-          <div class="dz-file-sub" id="enc-drop-sub">已读取，点击可重新选择文件</div>
+          <div class="dz-file-sub" id="enc-drop-sub" data-i18n="drop.loaded_short">已读取，点击可重新选择文件</div>
         </div>
       </div>
     </div>
@@ -641,8 +682,8 @@ header {
         <rect x="3" y="5.5" width="7" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/>
         <path d="M4.5 5.5V4a2 2 0 014 0v1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
       </svg>
-      <label class="pw-label">密码（可选）</label>
-      <input type="password" class="pw-input" id="enc-pw" placeholder="不填则不加密">
+      <label class="pw-label" data-i18n="encode.password.label">密码（可选）</label>
+      <input type="password" class="pw-input" id="enc-pw" data-i18n-placeholder="encode.password.placeholder" placeholder="不填则不加密">
     </div>
 
     <div class="result-card" id="enc-card">
@@ -652,20 +693,20 @@ header {
             <rect x="1" y="1" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.2"/>
             <path d="M4 6.5h5M6.5 4v5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
           </svg>
-          文件信息
+          <span data-i18n="encode.card.title">文件信息</span>
         </div>
-        <div class="rc-badge"><span class="rc-dot"></span>已读取</div>
+        <div class="rc-badge"><span class="rc-dot"></span><span data-i18n="badge.read">已读取</span></div>
       </div>
       <div class="rc-body">
         <img class="img-preview" id="enc-preview" alt="preview">
         <div class="meta-list">
-          <div class="meta-row"><span class="meta-key">文件名</span><span class="meta-val" id="enc-name">—</span></div>
-          <div class="meta-row"><span class="meta-key">大小</span><span class="meta-val" id="enc-size">—</span></div>
-          <div class="meta-row"><span class="meta-key">类型</span><span class="meta-val" id="enc-type">—</span></div>
-          <div class="meta-row"><span class="meta-key">输出名</span><span class="meta-val" id="enc-outname">—</span></div>
+          <div class="meta-row"><span class="meta-key" data-i18n="meta.filename">文件名</span><span class="meta-val" id="enc-name">—</span></div>
+          <div class="meta-row"><span class="meta-key" data-i18n="meta.size">大小</span><span class="meta-val" id="enc-size">—</span></div>
+          <div class="meta-row"><span class="meta-key" data-i18n="meta.type">类型</span><span class="meta-val" id="enc-type">—</span></div>
+          <div class="meta-row"><span class="meta-key" data-i18n="meta.output_name">输出名</span><span class="meta-val" id="enc-outname">—</span></div>
         </div>
         <div class="hex-block">
-          <div class="hex-label">Hex Preview</div>
+          <div class="hex-label" data-i18n="encode.hex_preview">Hex Preview</div>
           <div class="hex-content" id="enc-hex"></div>
         </div>
         <button class="btn" id="enc-btn" onclick="downloadBin()" disabled>
@@ -673,7 +714,7 @@ header {
             <path d="M6.5 1v8M3 6.5l3.5 3.5 3.5-3.5" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M1 10.5h11" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
           </svg>
-          下载 .bin 文件
+          <span data-i18n="button.download_bin">下载 .bin 文件</span>
         </button>
       </div>
     </div>
@@ -698,8 +739,8 @@ header {
             <path d="M13.5 12v3M12 13.5l1.5 1.5 1.5-1.5" stroke="#787774" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
-        <div class="dz-title">点击上传或拖入 .bin 文件</div>
-        <div class="dz-sub">仅支持由本工具生成的 .bin 文件，可还原图片或 ZIP</div>
+        <div class="dz-title" data-i18n="decode.drop.title">点击上传或拖入 .bin 文件</div>
+        <div class="dz-sub" data-i18n="decode.drop.sub">仅支持由本工具生成的 .bin 文件，可还原图片或 ZIP</div>
       </div>
       <div class="dz-file" id="dec-file-state">
         <div class="dz-icon">
@@ -709,7 +750,7 @@ header {
         </div>
         <div class="dz-file-meta">
           <div class="dz-file-name" id="dec-drop-name">—</div>
-          <div class="dz-file-sub" id="dec-drop-sub">已读取，点击可重新选择文件</div>
+          <div class="dz-file-sub" id="dec-drop-sub" data-i18n="drop.loaded_short">已读取，点击可重新选择文件</div>
         </div>
       </div>
     </div>
@@ -719,8 +760,8 @@ header {
         <rect x="3" y="5.5" width="7" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/>
         <path d="M4.5 5.5V4a2 2 0 014 0v1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
       </svg>
-      <input type="password" class="pw-input" id="dec-pw" placeholder="输入密码解密">
-      <button class="pw-btn" id="dec-decrypt-btn" onclick="doDecrypt()">解密还原</button>
+      <input type="password" class="pw-input" id="dec-pw" data-i18n-placeholder="decode.password.placeholder" placeholder="输入密码解密">
+      <button class="pw-btn" id="dec-decrypt-btn" onclick="doDecrypt()" data-i18n="button.decrypt_restore">解密还原</button>
     </div>
 
     <div class="result-card" id="dec-card">
@@ -730,24 +771,24 @@ header {
             <rect x="1" y="1" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.2"/>
             <path d="M4 6.5h5M6.5 4v5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
           </svg>
-          还原信息
+          <span data-i18n="decode.card.title">还原信息</span>
         </div>
-        <div class="rc-badge"><span class="rc-dot"></span>还原成功</div>
+        <div class="rc-badge"><span class="rc-dot"></span><span data-i18n="badge.restored">还原成功</span></div>
       </div>
       <div class="rc-body">
         <img class="img-preview" id="dec-preview" alt="restored">
         <div class="meta-list">
-          <div class="meta-row"><span class="meta-key">.bin 大小</span><span class="meta-val" id="dec-size">—</span></div>
-          <div class="meta-row"><span class="meta-key">文件类型</span><span class="meta-val" id="dec-type">—</span></div>
-          <div class="meta-row"><span class="meta-key">原文件名</span><span class="meta-val" id="dec-origname">—</span></div>
-          <div class="meta-row"><span class="meta-key">字节数</span><span class="meta-val" id="dec-imgsize">—</span></div>
+          <div class="meta-row"><span class="meta-key" data-i18n="meta.bin_size">.bin 大小</span><span class="meta-val" id="dec-size">—</span></div>
+          <div class="meta-row"><span class="meta-key" data-i18n="meta.file_type">文件类型</span><span class="meta-val" id="dec-type">—</span></div>
+          <div class="meta-row"><span class="meta-key" data-i18n="meta.original_name">原文件名</span><span class="meta-val" id="dec-origname">—</span></div>
+          <div class="meta-row"><span class="meta-key" data-i18n="meta.bytes">字节数</span><span class="meta-val" id="dec-imgsize">—</span></div>
         </div>
         <button class="btn" id="dec-btn" onclick="downloadImg()" disabled>
           <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
             <path d="M6.5 1v8M3 6.5l3.5 3.5 3.5-3.5" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M1 10.5h11" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
           </svg>
-          下载还原的文件
+          <span data-i18n="button.download_restored">下载还原的文件</span>
         </button>
       </div>
     </div>
@@ -762,8 +803,8 @@ header {
   <div class="callout" style="margin-top:28px;">
     <div class="callout-icon">🔒</div>
     <div class="callout-body">
-      <div class="callout-title">完全本地处理</div>
-      <div class="callout-text">所有操作在浏览器内完成，文件不会上传至任何服务器。设置密码后内容经 AES-256-GCM 加密，无密码无法还原；不设密码时输出为自定义二进制格式，系统无法识别为原始文件类型。</div>
+      <div class="callout-title" data-i18n="callout.title">完全本地处理</div>
+      <div class="callout-text" data-i18n="callout.text">所有操作在浏览器内完成，文件不会上传至任何服务器。设置密码后内容经 AES-256-GCM 加密，无密码无法还原；不设密码时输出为自定义二进制格式，系统无法识别为原始文件类型。</div>
     </div>
   </div>
 
@@ -774,21 +815,187 @@ header {
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
         <path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      工作原理
+      <span data-i18n="how.title">工作原理</span>
     </button>
     <div class="toggle-body" id="how-body">
-      <p>不设密码：读取文件原始字节，头部写入 4 字节魔术标识 + MIME 类型 + 原始文件名，拼接文件数据输出为 .bin。还原时解析头部并重建原始文件，全程无损。</p>
-      <p>设置密码：将 MIME 类型、文件名和文件数据打包后用 AES-256-GCM 加密，密钥由 PBKDF2 从密码派生（SHA-256，100,000 次迭代，随机盐值）。加密完全在浏览器本地完成，密码不存储、不传输；还原时需输入相同密码方可解密。</p>
+      <p data-i18n="how.plain">不设密码：读取文件原始字节，头部写入 4 字节魔术标识 + MIME 类型 + 原始文件名，拼接文件数据输出为 .bin。还原时解析头部并重建原始文件，全程无损。</p>
+      <p data-i18n="how.encrypted">设置密码：将 MIME 类型、文件名和文件数据打包后用 AES-256-GCM 加密，密钥由 PBKDF2 从密码派生（SHA-256，100,000 次迭代，随机盐值）。加密完全在浏览器本地完成，密码不存储、不传输；还原时需输入相同密码方可解密。</p>
     </div>
   </div>
 
 </div>
 
 <script>
+const I18N_DEFAULT = 'zh-CN'
+const I18N_SUPPORTED = ['zh-CN', 'en-US']
+const messages = {
+  'zh-CN': {
+    'lang.zh':'中文',
+    'lang.en':'EN',
+    'aria.language_switch':'语言切换',
+    'breadcrumb.tools':'工具',
+    'header.desc':'将文件转为二进制 .bin 格式保存，随时还原。全程本地处理，零上传。',
+    'tab.encode':'文件 → .bin 转换',
+    'tab.decode':'.bin → 文件 还原',
+    'encode.drop.title':'点击上传或拖入文件',
+    'encode.drop.sub':'支持图片（JPG、PNG、WebP 等）和 ZIP 压缩包',
+    'decode.drop.title':'点击上传或拖入 .bin 文件',
+    'decode.drop.sub':'仅支持由本工具生成的 .bin 文件，可还原图片或 ZIP',
+    'encode.password.label':'密码（可选）',
+    'encode.password.placeholder':'不填则不加密',
+    'decode.password.placeholder':'输入密码解密',
+    'encode.card.title':'文件信息',
+    'decode.card.title':'还原信息',
+    'badge.read':'已读取',
+    'badge.restored':'还原成功',
+    'meta.filename':'文件名',
+    'meta.size':'大小',
+    'meta.type':'类型',
+    'meta.output_name':'输出名',
+    'meta.bin_size':'.bin 大小',
+    'meta.file_type':'文件类型',
+    'meta.original_name':'原文件名',
+    'meta.bytes':'字节数',
+    'encode.hex_preview':'Hex Preview',
+    'button.download_bin':'下载 .bin 文件',
+    'button.download_restored':'下载还原的文件',
+    'button.decrypt_restore':'解密还原',
+    'button.decrypting':'解密中…',
+    'drop.loaded_short':'已读取，点击可重新选择文件',
+    'drop.loaded_prefix':'已读取',
+    'drop.reselect_suffix':'点击可重新选择文件',
+    'drop.loaded_with_size':'{prefix} · {size} · {suffix}',
+    'status.enc_ready':'已读取，点击下载 .bin 文件',
+    'status.enc_encrypted':'已加密打包，点击下载 .bin 文件',
+    'status.dec_restored':'还原成功，文件完整无损',
+    'status.dec_too_short':'无效文件：数据过短',
+    'status.dec_not_from_tool':'无效文件：不是由本工具生成的 .bin',
+    'status.dec_structure_bad':'文件结构损坏，无法还原',
+    'status.dec_enc_incomplete':'无效文件：加密数据不完整',
+    'status.dec_need_password':'检测到加密文件，请输入密码后解密',
+    'status.dec_input_password':'请输入密码',
+    'status.dec_bad_password':'密码错误，无法解密',
+    'callout.title':'完全本地处理',
+    'callout.text':'所有操作在浏览器内完成，文件不会上传至任何服务器。设置密码后内容经 AES-256-GCM 加密，无密码无法还原；不设密码时输出为自定义二进制格式，系统无法识别为原始文件类型。',
+    'how.title':'工作原理',
+    'how.plain':'不设密码：读取文件原始字节，头部写入 4 字节魔术标识 + MIME 类型 + 原始文件名，拼接文件数据输出为 .bin。还原时解析头部并重建原始文件，全程无损。',
+    'how.encrypted':'设置密码：将 MIME 类型、文件名和文件数据打包后用 AES-256-GCM 加密，密钥由 PBKDF2 从密码派生（SHA-256，100,000 次迭代，随机盐值）。加密完全在浏览器本地完成，密码不存储、不传输；还原时需输入相同密码方可解密。',
+    'file.restored_default':'restored_file'
+  },
+  'en-US': {
+    'lang.zh':'中文',
+    'lang.en':'EN',
+    'aria.language_switch':'Language switch',
+    'breadcrumb.tools':'Tools',
+    'header.desc':'Convert files to .bin and restore anytime. Everything runs locally with zero upload.',
+    'tab.encode':'File → .bin',
+    'tab.decode':'.bin → File',
+    'encode.drop.title':'Click to upload or drag a file',
+    'encode.drop.sub':'Supports images (JPG, PNG, WebP) and ZIP archives',
+    'decode.drop.title':'Click to upload or drag a .bin file',
+    'decode.drop.sub':'Only .bin generated by this tool can be restored',
+    'encode.password.label':'Password (optional)',
+    'encode.password.placeholder':'Leave blank for no encryption',
+    'decode.password.placeholder':'Enter password to decrypt',
+    'encode.card.title':'File Info',
+    'decode.card.title':'Restore Info',
+    'badge.read':'Loaded',
+    'badge.restored':'Restored',
+    'meta.filename':'Filename',
+    'meta.size':'Size',
+    'meta.type':'Type',
+    'meta.output_name':'Output',
+    'meta.bin_size':'.bin Size',
+    'meta.file_type':'File Type',
+    'meta.original_name':'Original Name',
+    'meta.bytes':'Bytes',
+    'encode.hex_preview':'Hex Preview',
+    'button.download_bin':'Download .bin',
+    'button.download_restored':'Download Restored File',
+    'button.decrypt_restore':'Decrypt & Restore',
+    'button.decrypting':'Decrypting…',
+    'drop.loaded_short':'Loaded, click to reselect',
+    'drop.loaded_prefix':'Loaded',
+    'drop.reselect_suffix':'click to reselect',
+    'drop.loaded_with_size':'{prefix} · {size} · {suffix}',
+    'status.enc_ready':'Ready. Click to download the .bin file',
+    'status.enc_encrypted':'Encrypted and packed. Click to download the .bin file',
+    'status.dec_restored':'Restore complete, file integrity verified',
+    'status.dec_too_short':'Invalid file: data too short',
+    'status.dec_not_from_tool':'Invalid file: not generated by this tool',
+    'status.dec_structure_bad':'Corrupted structure, unable to restore',
+    'status.dec_enc_incomplete':'Invalid file: incomplete encrypted payload',
+    'status.dec_need_password':'Encrypted file detected, enter password to decrypt',
+    'status.dec_input_password':'Please enter password',
+    'status.dec_bad_password':'Wrong password, unable to decrypt',
+    'callout.title':'Fully Local Processing',
+    'callout.text':'All operations happen in your browser. Files are never uploaded. With a password, content is encrypted using AES-256-GCM and cannot be restored without it. Without a password, output is a custom binary format not recognized as the original type.',
+    'how.title':'How it works',
+    'how.plain':'Without password: read file bytes, write a 4-byte magic header + MIME type + original filename, then append file data into .bin. During restore, parse the header and rebuild the original file losslessly.',
+    'how.encrypted':'With password: package MIME type, filename, and file data, then encrypt with AES-256-GCM. The key is derived from password via PBKDF2 (SHA-256, 100,000 iterations, random salt). Encryption is local; password is never stored or transmitted.',
+    'file.restored_default':'restored_file'
+  }
+}
+let currentLocale = I18N_DEFAULT
+
+function resolveLocale() {
+  const queryLang = new URLSearchParams(location.search).get('lang')
+  if (queryLang && I18N_SUPPORTED.includes(queryLang)) return queryLang
+  const saved = localStorage.getItem('file2bin_locale')
+  if (saved && I18N_SUPPORTED.includes(saved)) return saved
+  const browser = navigator.language
+  if (browser) {
+    if (I18N_SUPPORTED.includes(browser)) return browser
+    if (browser.toLowerCase().startsWith('zh')) return 'zh-CN'
+    if (browser.toLowerCase().startsWith('en')) return 'en-US'
+  }
+  return I18N_DEFAULT
+}
+
+function t(key, vars = {}) {
+  const pack = messages[currentLocale] || messages[I18N_DEFAULT]
+  const fallback = messages[I18N_DEFAULT]
+  const template = pack[key] ?? fallback[key] ?? key
+  return template.replace(/\{(\w+)\}/g, (_, token) => (vars[token] ?? `{${token}}`))
+}
+
+function applyI18n() {
+  document.documentElement.lang = currentLocale === 'zh-CN' ? 'zh' : 'en'
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.dataset.i18n)
+  })
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.placeholder = t(el.dataset.i18nPlaceholder)
+  })
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(el => {
+    el.setAttribute('aria-label', t(el.dataset.i18nAriaLabel))
+  })
+  const activeStatus = document.getElementById('enc-status-text')
+  if (activeStatus && activeStatus.dataset.i18nKey) {
+    activeStatus.textContent = t(activeStatus.dataset.i18nKey)
+  }
+  const decStatus = document.getElementById('dec-status-text')
+  if (decStatus && decStatus.dataset.i18nKey) {
+    decStatus.textContent = t(decStatus.dataset.i18nKey)
+  }
+  document.querySelectorAll('.locale-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.id === `lang-${currentLocale}`)
+  })
+}
+
+function setLocale(locale) {
+  if (!I18N_SUPPORTED.includes(locale)) return
+  currentLocale = locale
+  localStorage.setItem('file2bin_locale', locale)
+  applyI18n()
+  if (encFile) updateEncodeDropzone(encFile)
+  if (decFile) updateDecodeDropzone(decFile)
+}
+
 const MAGIC     = new Uint8Array([0x49,0x4D,0x42,0x01]) // plain
 const MAGIC_ENC = new Uint8Array([0x49,0x4D,0x42,0x02]) // AES-GCM encrypted
 let encBuffer=null,encFile=null
-let decBlob=null,decOrigName=null
+let decBlob=null,decOrigName=null,decFile=null
 let pendingDecBytes=null
 let encPreviewUrl=null,decPreviewUrl=null,encDownloadUrl=null,decDownloadUrl=null
 
@@ -837,13 +1044,22 @@ function showStatus(panel, msg, type) {
   const txt = document.getElementById(panel+'-status-text')
   el.className = 'status '+type
   txt.textContent = msg
+  txt.dataset.i18nKey = ''
+}
+
+function showStatusByKey(panel, key, type, vars = {}) {
+  const el = document.getElementById(panel+'-status')
+  const txt = document.getElementById(panel+'-status-text')
+  el.className = 'status '+type
+  txt.dataset.i18nKey = key
+  txt.textContent = t(key, vars)
 }
 
 function revokeObjectUrl(url) {
   if(url) URL.revokeObjectURL(url)
 }
 
-function updateDropzoneState(zoneId, nameId, subId, file, subtitlePrefix='已读取') {
+function updateDropzoneState(zoneId, nameId, subId, file, subtitlePrefixKey='drop.loaded_prefix') {
   const zone = document.getElementById(zoneId)
   if(!zone) return
   if(!file) {
@@ -854,15 +1070,19 @@ function updateDropzoneState(zoneId, nameId, subId, file, subtitlePrefix='已读
   const nameEl = document.getElementById(nameId)
   const subEl = document.getElementById(subId)
   if(nameEl) nameEl.textContent = file.name
-  if(subEl) subEl.textContent = `${subtitlePrefix} · ${formatSize(file.size)} · 点击可重新选择文件`
+  if(subEl) subEl.textContent = t('drop.loaded_with_size', {
+    prefix: t(subtitlePrefixKey),
+    size: formatSize(file.size),
+    suffix: t('drop.reselect_suffix')
+  })
 }
 
 function updateEncodeDropzone(file) {
-  updateDropzoneState('drop-encode', 'enc-drop-name', 'enc-drop-sub', file, '已读取')
+  updateDropzoneState('drop-encode', 'enc-drop-name', 'enc-drop-sub', file, 'drop.loaded_prefix')
 }
 
 function updateDecodeDropzone(file) {
-  updateDropzoneState('drop-decode', 'dec-drop-name', 'dec-drop-sub', file, '已载入')
+  updateDropzoneState('drop-decode', 'dec-drop-name', 'dec-drop-sub', file, 'drop.loaded_prefix')
 }
 
 // ── Encode ───────────────────────────────────────────────────────────────────
@@ -934,7 +1154,7 @@ async function handleEncode(file) {
   document.getElementById('enc-hex').textContent     = toHex(out)
   document.getElementById('enc-card').classList.add('visible')
   document.getElementById('enc-btn').disabled = false
-  showStatus('enc', pw ? '已加密打包，点击下载 .bin 文件' : '已读取，点击下载 .bin 文件', 'ok')
+  showStatusByKey('enc', pw ? 'status.enc_encrypted' : 'status.enc_ready', 'ok')
 }
 
 async function downloadBin(){
@@ -981,18 +1201,20 @@ function decodePlain(bytes, offset) {
   document.getElementById('dec-imgsize').textContent  = formatSize(data.length)
   document.getElementById('dec-card').classList.add('visible')
   document.getElementById('dec-btn').disabled = false
-  showStatus('dec','还原成功，文件完整无损','ok')
+  showStatusByKey('dec','status.dec_restored','ok')
 }
 
 async function handleDecode(file) {
   if(!file) {
+    decFile = null
     updateDecodeDropzone(null)
     return
   }
+  decFile = file
   updateDecodeDropzone(file)
   const buf = await file.arrayBuffer()
   const bytes = new Uint8Array(buf)
-  if(bytes.length < 4){showStatus('dec','无效文件：数据过短','err'); return}
+  if(bytes.length < 4){showStatusByKey('dec','status.dec_too_short','err'); return}
   // Reset
   pendingDecBytes = null; decBlob = null
   document.getElementById('dec-pw-section').style.display = 'none'
@@ -1001,7 +1223,7 @@ async function handleDecode(file) {
 
   const isPlain = bytes[0]===0x49&&bytes[1]===0x4D&&bytes[2]===0x42&&bytes[3]===0x01
   const isEnc   = bytes[0]===0x49&&bytes[1]===0x4D&&bytes[2]===0x42&&bytes[3]===0x02
-  if(!isPlain&&!isEnc){showStatus('dec','无效文件：不是由本工具生成的 .bin','err'); return}
+  if(!isPlain&&!isEnc){showStatusByKey('dec','status.dec_not_from_tool','err'); return}
 
   document.getElementById('dec-size').textContent = formatSize(file.size)
 
@@ -1009,23 +1231,23 @@ async function handleDecode(file) {
     try {
       decodePlain(bytes, 4)
     } catch {
-      showStatus('dec','文件结构损坏，无法还原','err')
+      showStatusByKey('dec','status.dec_structure_bad','err')
     }
     return
   }
 
   // Encrypted file — show password prompt
-  if(bytes.length < 33){showStatus('dec','无效文件：加密数据不完整','err'); return}
+  if(bytes.length < 33){showStatusByKey('dec','status.dec_enc_incomplete','err'); return}
   pendingDecBytes = bytes
   document.getElementById('dec-pw-section').style.display = 'flex'
   document.getElementById('dec-pw').value = ''
   document.getElementById('dec-pw').focus()
-  showStatus('dec','检测到加密文件，请输入密码后解密','ok')
+  showStatusByKey('dec','status.dec_need_password','ok')
 }
 
 async function doDecrypt() {
   const pw = document.getElementById('dec-pw').value.trim()
-  if(!pw) {showStatus('dec','请输入密码','err'); return}
+  if(!pw) {showStatusByKey('dec','status.dec_input_password','err'); return}
   if(!pendingDecBytes) return
   const bytes = pendingDecBytes
   // Format: [MAGIC_ENC 4][Salt 16][IV 12][EncryptedPayload]
@@ -1033,7 +1255,7 @@ async function doDecrypt() {
   const iv        = bytes.slice(20, 32)
   const encrypted = bytes.slice(32)
   const btn = document.getElementById('dec-decrypt-btn')
-  btn.disabled = true; btn.textContent = '解密中…'
+  btn.disabled = true; btn.textContent = t('button.decrypting')
   try {
     const key      = await deriveKey(pw, salt)
     const decrypted = new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv}, key, encrypted))
@@ -1041,9 +1263,9 @@ async function doDecrypt() {
     document.getElementById('dec-pw-section').style.display = 'none'
     decodePlain(decrypted, 0)
   } catch {
-    showStatus('dec','密码错误，无法解密','err')
+    showStatusByKey('dec','status.dec_bad_password','err')
   } finally {
-    btn.disabled = false; btn.textContent = '解密还原'
+    btn.disabled = false; btn.textContent = t('button.decrypt_restore')
   }
 }
 
@@ -1053,7 +1275,7 @@ function downloadImg(){
   revokeObjectUrl(decDownloadUrl)
   decDownloadUrl = URL.createObjectURL(decBlob)
   a.href = decDownloadUrl
-  a.download = decOrigName || 'restored_file'
+  a.download = decOrigName || t('file.restored_default')
   a.click()
 }
 
@@ -1075,6 +1297,9 @@ function downloadImg(){
 document.getElementById('dec-pw').addEventListener('keydown',e=>{
   if(e.key==='Enter') doDecrypt()
 })
+
+currentLocale = resolveLocale()
+applyI18n()
 </script>
 </body>
 </html>
