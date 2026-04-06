@@ -4,34 +4,36 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FILE·BIN</title>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
   --bg: #ffffff;
-  --bg-subtle: #f7f7f5;
-  --bg-hover: #f1f1ef;
-  --border: #e8e8e6;
-  --border-focus: #b8b8b4;
-  --text: #1a1a1a;
-  --text-2: #787774;
-  --text-3: #b0b0ab;
-  --accent: #2383e2;
-  --accent-bg: #eef5fd;
-  --accent-border: #c5ddf7;
-  --green: #0f7b6c;
-  --green-bg: #eefaf7;
-  --red: #e03e3e;
-  --red-bg: #fdf2f2;
-  --radius: 8px;
-  --radius-sm: 6px;
+  --bg-subtle: #f6f5f4;
+  --bg-hover: rgba(0, 0, 0, 0.045);
+  --border: rgba(0,0,0,0.1);
+  --border-focus: #097fe8;
+  --text: rgba(0,0,0,0.95);
+  --text-2: #615d59;
+  --text-3: #a39e98;
+  --accent: #0075de;
+  --accent-active: #005bab;
+  --accent-bg: #f2f9ff;
+  --accent-border: #cae6ff;
+  --green: #1aae39;
+  --green-bg: #f2fbf4;
+  --red: #dd5b00;
+  --red-bg: #fff6ef;
+  --radius: 12px;
+  --radius-sm: 4px;
+  --shadow-card: rgba(0,0,0,0.04) 0px 4px 18px, rgba(0,0,0,0.027) 0px 2.025px 7.84688px, rgba(0,0,0,0.02) 0px 0.8px 2.925px, rgba(0,0,0,0.01) 0px 0.175px 1.04062px;
 }
 
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Inter', -apple-system, system-ui, 'Segoe UI', Helvetica, Arial, sans-serif;
   font-size: 14px;
   line-height: 1.5;
   min-height: 100vh;
@@ -46,7 +48,7 @@ body {
 
 /* ── Header ── */
 header {
-  margin-bottom: 40px;
+  margin-bottom: 36px;
 }
 
 .breadcrumb {
@@ -75,8 +77,8 @@ header {
 
 .page-title {
   font-size: 30px;
-  font-weight: 600;
-  letter-spacing: -0.5px;
+  font-weight: 700;
+  letter-spacing: -0.8px;
   color: var(--text);
   line-height: 1.2;
   margin-bottom: 6px;
@@ -101,7 +103,7 @@ header {
   gap: 2px;
   background: var(--bg-subtle);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 10px;
   padding: 3px;
   margin-bottom: 20px;
 }
@@ -111,7 +113,7 @@ header {
   padding: 7px 12px;
   background: none;
   border: none;
-  border-radius: 6px;
+  border-radius: 7px;
   font-family: inherit;
   font-size: 13px;
   font-weight: 500;
@@ -129,7 +131,7 @@ header {
 .tab.active {
   background: var(--bg);
   color: var(--text);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 0 0 1px var(--border);
+  box-shadow: var(--shadow-card);
 }
 
 .tab svg { flex-shrink: 0; }
@@ -149,13 +151,14 @@ header {
 /* ── Drop zone ── */
 .dropzone {
   border: 1.5px dashed var(--border);
-  border-radius: var(--radius);
+  border-radius: 12px;
   padding: 36px 24px;
   text-align: center;
   cursor: pointer;
   position: relative;
   transition: all 0.12s;
   background: var(--bg);
+  box-shadow: var(--shadow-card);
 }
 
 .dropzone:hover, .dropzone.drag-over {
@@ -257,7 +260,7 @@ header {
 .result-card {
   margin-top: 12px;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 12px;
   overflow: hidden;
   display: none;
   animation: fadeIn 0.15s ease;
@@ -291,7 +294,7 @@ header {
   color: var(--green);
   background: var(--green-bg);
   border: 1px solid #b8ede5;
-  border-radius: 4px;
+  border-radius: 9999px;
   padding: 1px 7px;
 }
 
@@ -398,8 +401,8 @@ header {
   gap: 6px;
   width: 100%;
   padding: 8px 16px;
-  background: var(--text);
-  border: none;
+  background: var(--accent);
+  border: 1px solid transparent;
   border-radius: var(--radius-sm);
   color: #fff;
   font-family: inherit;
@@ -410,7 +413,7 @@ header {
 }
 
 .btn:hover { opacity: 0.85; }
-.btn:active { opacity: 0.7; }
+.btn:active { background: var(--accent-active); }
 .btn:disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
 
 /* ── Status ── */
@@ -427,14 +430,14 @@ header {
 .status.ok  {
   display: flex;
   background: var(--green-bg);
-  border: 1px solid #b8ede5;
+  border: 1px solid rgba(26,174,57,0.25);
   color: var(--green);
 }
 
 .status.err {
   display: flex;
   background: var(--red-bg);
-  border: 1px solid #f5c5c5;
+  border: 1px solid rgba(221,91,0,0.25);
   color: var(--red);
 }
 
@@ -560,7 +563,8 @@ header {
   transition: opacity 0.12s;
   white-space: nowrap;
 }
-.pw-btn:hover { opacity: 0.85; }
+.pw-btn:hover { opacity: 0.9; }
+.pw-btn:active { background: var(--accent-active); }
 .pw-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 @media (max-width: 480px) {
