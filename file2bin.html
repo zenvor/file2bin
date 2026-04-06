@@ -856,7 +856,7 @@ const messages = {
     'meta.file_type':'文件类型',
     'meta.original_name':'原文件名',
     'meta.bytes':'字节数',
-    'encode.hex_preview':'Hex Preview',
+    'encode.hex_preview':'hex 预览',
     'button.download_bin':'下载 .bin 文件',
     'button.download_restored':'下载还原的文件',
     'button.decrypt_restore':'解密还原',
@@ -972,11 +972,13 @@ function applyI18n() {
   })
   const activeStatus = document.getElementById('enc-status-text')
   if (activeStatus && activeStatus.dataset.i18nKey) {
-    activeStatus.textContent = t(activeStatus.dataset.i18nKey)
+    const vars = activeStatus.dataset.i18nVars ? JSON.parse(activeStatus.dataset.i18nVars) : {}
+    activeStatus.textContent = t(activeStatus.dataset.i18nKey, vars)
   }
   const decStatus = document.getElementById('dec-status-text')
   if (decStatus && decStatus.dataset.i18nKey) {
-    decStatus.textContent = t(decStatus.dataset.i18nKey)
+    const vars = decStatus.dataset.i18nVars ? JSON.parse(decStatus.dataset.i18nVars) : {}
+    decStatus.textContent = t(decStatus.dataset.i18nKey, vars)
   }
   document.querySelectorAll('.locale-btn').forEach(btn => {
     btn.classList.toggle('active', btn.id === `lang-${currentLocale}`)
@@ -1045,6 +1047,7 @@ function showStatus(panel, msg, type) {
   el.className = 'status '+type
   txt.textContent = msg
   txt.dataset.i18nKey = ''
+  txt.dataset.i18nVars = ''
 }
 
 function showStatusByKey(panel, key, type, vars = {}) {
@@ -1052,6 +1055,7 @@ function showStatusByKey(panel, key, type, vars = {}) {
   const txt = document.getElementById(panel+'-status-text')
   el.className = 'status '+type
   txt.dataset.i18nKey = key
+  txt.dataset.i18nVars = JSON.stringify(vars)
   txt.textContent = t(key, vars)
 }
 
