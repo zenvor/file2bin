@@ -462,6 +462,56 @@ header {
 
 .toggle-body p:last-child { margin-bottom: 0; }
 
+/* ── Password section ── */
+.pw-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 9px 12px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.pw-label {
+  font-size: 12px;
+  color: var(--text-3);
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.pw-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+}
+
+.pw-input::placeholder { color: var(--text-3); }
+
+.pw-btn {
+  flex-shrink: 0;
+  padding: 5px 12px;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.12s;
+  white-space: nowrap;
+}
+.pw-btn:hover { opacity: 0.85; }
+.pw-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
 @media (max-width: 480px) {
   .page { padding: 40px 16px 80px; }
   .page-title { font-size: 24px; }
@@ -516,6 +566,15 @@ header {
       </div>
       <div class="dz-title">点击上传或拖入文件</div>
       <div class="dz-sub">支持图片（JPG、PNG、WebP 等）和 ZIP 压缩包</div>
+    </div>
+
+    <div class="pw-section">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none" style="flex-shrink:0;color:var(--text-3)">
+        <rect x="3" y="5.5" width="7" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/>
+        <path d="M4.5 5.5V4a2 2 0 014 0v1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+      </svg>
+      <label class="pw-label">密码（可选）</label>
+      <input type="password" class="pw-input" id="enc-pw" placeholder="不填则不加密">
     </div>
 
     <div class="result-card" id="enc-card">
@@ -574,6 +633,15 @@ header {
       <div class="dz-sub">仅支持由本工具生成的 .bin 文件，可还原图片或 ZIP</div>
     </div>
 
+    <div class="pw-section" id="dec-pw-section" style="display:none;">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none" style="flex-shrink:0;color:var(--accent)">
+        <rect x="3" y="5.5" width="7" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/>
+        <path d="M4.5 5.5V4a2 2 0 014 0v1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+      </svg>
+      <input type="password" class="pw-input" id="dec-pw" placeholder="输入密码解密">
+      <button class="pw-btn" id="dec-decrypt-btn" onclick="doDecrypt()">解密还原</button>
+    </div>
+
     <div class="result-card" id="dec-card">
       <div class="rc-head">
         <div class="rc-head-left">
@@ -614,7 +682,7 @@ header {
     <div class="callout-icon">🔒</div>
     <div class="callout-body">
       <div class="callout-title">完全本地处理</div>
-      <div class="callout-text">所有操作在浏览器内完成，文件不会上传至任何服务器。.bin 文件无法被系统识别为图片或压缩包，适合作为简单的隐私保护手段。</div>
+      <div class="callout-text">所有操作在浏览器内完成，文件不会上传至任何服务器。设置密码后内容经 AES-256-GCM 加密，无密码无法还原；不设密码时输出为自定义二进制格式，系统无法识别为原始文件类型。</div>
     </div>
   </div>
 
@@ -628,17 +696,36 @@ header {
       工作原理
     </button>
     <div class="toggle-body" id="how-body">
-      <p>转换时读取文件的原始字节，在头部写入 4 字节魔术标识 + MIME 类型 + 原始文件名，最后拼接文件数据，输出为 .bin 文件。</p>
-      <p>还原时读取 .bin 头部信息，解析出原始文件类型和文件名，提取数据字节并重建为原始文件，全程无损。</p>
+      <p>不设密码：读取文件原始字节，头部写入 4 字节魔术标识 + MIME 类型 + 原始文件名，拼接文件数据输出为 .bin。还原时解析头部并重建原始文件，全程无损。</p>
+      <p>设置密码：将 MIME 类型、文件名和文件数据打包后用 AES-256-GCM 加密，密钥由 PBKDF2 从密码派生（SHA-256，100,000 次迭代，随机盐值）。加密完全在浏览器本地完成，密码不存储、不传输；还原时需输入相同密码方可解密。</p>
     </div>
   </div>
 
 </div>
 
 <script>
-const MAGIC = new Uint8Array([0x49,0x4D,0x42,0x01])
-let encBuffer=null,encMime=null,encOrigName=null
+const MAGIC     = new Uint8Array([0x49,0x4D,0x42,0x01]) // plain
+const MAGIC_ENC = new Uint8Array([0x49,0x4D,0x42,0x02]) // AES-GCM encrypted
+let encBuffer=null,encMime=null,encOrigName=null,encFile=null
 let decBlob=null,decMime=null,decOrigName=null
+let pendingDecBytes=null
+
+// ── Crypto helpers ──────────────────────────────────────────────────────────
+
+async function deriveKey(password, salt) {
+  const km = await crypto.subtle.importKey(
+    'raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']
+  )
+  return crypto.subtle.deriveKey(
+    {name:'PBKDF2', salt, iterations:100000, hash:'SHA-256'},
+    km,
+    {name:'AES-GCM', length:256},
+    false,
+    ['encrypt','decrypt']
+  )
+}
+
+// ── UI helpers ───────────────────────────────────────────────────────────────
 
 function switchTab(tab) {
   const isEnc = tab==='encode'
@@ -670,91 +757,179 @@ function showStatus(panel, msg, type) {
   txt.textContent = msg
 }
 
-async function handleEncode(file){
+// ── Encode ───────────────────────────────────────────────────────────────────
+
+async function handleEncode(file) {
   if(!file) return
-  const buf=await file.arrayBuffer()
-  const bytes=new Uint8Array(buf)
-  encOrigName=file.name
-  const isZip=encOrigName.toLowerCase().endsWith('.zip')
-  encMime=isZip?'application/zip':(file.type||'application/octet-stream')
-  const mimeB=new TextEncoder().encode(encMime)
-  const nameB=new TextEncoder().encode(encOrigName)
-  const out=new Uint8Array(4+2+mimeB.length+2+nameB.length+bytes.length)
-  let o=0
-  out.set(MAGIC,o);o+=4
-  out[o++]=(mimeB.length>>8)&0xff;out[o++]=mimeB.length&0xff
-  out.set(mimeB,o);o+=mimeB.length
-  out[o++]=(nameB.length>>8)&0xff;out[o++]=nameB.length&0xff
-  out.set(nameB,o);o+=nameB.length
-  out.set(bytes,o)
-  encBuffer=out
-  const prev=document.getElementById('enc-preview')
-  if(isZip){prev.style.display='none';prev.src=''}
-  else{prev.src=URL.createObjectURL(file);prev.style.display='block'}
-  const base=encOrigName.replace(/\.[^.]+$/,'')
-  document.getElementById('enc-name').textContent=encOrigName
-  document.getElementById('enc-size').textContent=formatSize(file.size)
-  document.getElementById('enc-type').textContent=isZip?'application/zip':encMime
-  document.getElementById('enc-outname').textContent=base+'_encrypted.bin'
-  document.getElementById('enc-hex').textContent=toHex(out)
+  encFile = file
+  const buf = await file.arrayBuffer()
+  const bytes = new Uint8Array(buf)
+  encOrigName = file.name
+  const isZip = encOrigName.toLowerCase().endsWith('.zip')
+  encMime = isZip ? 'application/zip' : (file.type || 'application/octet-stream')
+  const mimeB = new TextEncoder().encode(encMime)
+  const nameB = new TextEncoder().encode(encOrigName)
+  const pw = document.getElementById('enc-pw').value.trim()
+  let out
+
+  if(pw) {
+    // Build cleartext payload: [MimeLen 2][Mime][NameLen 2][Name][FileData]
+    const payload = new Uint8Array(2+mimeB.length+2+nameB.length+bytes.length)
+    let p=0
+    payload[p++]=(mimeB.length>>8)&0xff; payload[p++]=mimeB.length&0xff
+    payload.set(mimeB,p); p+=mimeB.length
+    payload[p++]=(nameB.length>>8)&0xff; payload[p++]=nameB.length&0xff
+    payload.set(nameB,p); p+=nameB.length
+    payload.set(bytes,p)
+    // Encrypt with AES-256-GCM
+    const salt = crypto.getRandomValues(new Uint8Array(16))
+    const iv   = crypto.getRandomValues(new Uint8Array(12))
+    const key  = await deriveKey(pw, salt)
+    const enc  = new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv}, key, payload))
+    // Output: [MAGIC_ENC 4][Salt 16][IV 12][EncryptedPayload]
+    out = new Uint8Array(4+16+12+enc.length)
+    let o=0
+    out.set(MAGIC_ENC,o); o+=4
+    out.set(salt,o); o+=16
+    out.set(iv,o); o+=12
+    out.set(enc,o)
+  } else {
+    // No encryption — original format, backward compatible
+    out = new Uint8Array(4+2+mimeB.length+2+nameB.length+bytes.length)
+    let o=0
+    out.set(MAGIC,o); o+=4
+    out[o++]=(mimeB.length>>8)&0xff; out[o++]=mimeB.length&0xff
+    out.set(mimeB,o); o+=mimeB.length
+    out[o++]=(nameB.length>>8)&0xff; out[o++]=nameB.length&0xff
+    out.set(nameB,o); o+=nameB.length
+    out.set(bytes,o)
+  }
+
+  encBuffer = out
+  const prev = document.getElementById('enc-preview')
+  if(isZip){prev.style.display='none'; prev.src=''}
+  else{prev.src=URL.createObjectURL(file); prev.style.display='block'}
+  const base = encOrigName.replace(/\.[^.]+$/,'')
+  document.getElementById('enc-name').textContent    = encOrigName
+  document.getElementById('enc-size').textContent    = formatSize(file.size)
+  document.getElementById('enc-type').textContent    = isZip ? 'application/zip' : encMime
+  document.getElementById('enc-outname').textContent = base+'_encrypted.bin'
+  document.getElementById('enc-hex').textContent     = toHex(out)
   document.getElementById('enc-card').classList.add('visible')
-  document.getElementById('enc-btn').disabled=false
-  showStatus('enc','已解析，点击下载 .bin 文件','ok')
+  document.getElementById('enc-btn').disabled = false
+  showStatus('enc', pw ? '已加密打包，点击下载 .bin 文件' : '已读取，点击下载 .bin 文件', 'ok')
 }
 
 function downloadBin(){
   if(!encBuffer) return
-  const a=document.createElement('a')
-  a.href=URL.createObjectURL(new Blob([encBuffer],{type:'application/octet-stream'}))
-  a.download=encOrigName.replace(/\.[^.]+$/,'')+'_encrypted.bin'
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(new Blob([encBuffer],{type:'application/octet-stream'}))
+  a.download = encOrigName.replace(/\.[^.]+$/,'')+'_encrypted.bin'
   a.click()
 }
 
-async function handleDecode(file){
-  if(!file) return
-  const buf=await file.arrayBuffer()
-  const bytes=new Uint8Array(buf)
-  if(bytes[0]!==0x49||bytes[1]!==0x4D||bytes[2]!==0x42||bytes[3]!==0x01){
-    showStatus('dec','无效文件：不是由本工具生成的 .bin','err'); return
-  }
-  let o=4
-  const mimeLen=(bytes[o]<<8)|bytes[o+1];o+=2
-  const mimeStr=new TextDecoder().decode(bytes.slice(o,o+mimeLen));o+=mimeLen
-  const nameLen=(bytes[o]<<8)|bytes[o+1];o+=2
-  const origName=new TextDecoder().decode(bytes.slice(o,o+nameLen));o+=nameLen
-  const data=bytes.slice(o)
-  decMime=mimeStr;decOrigName=origName
-  decBlob=new Blob([data],{type:mimeStr})
-  const prev=document.getElementById('dec-preview')
-  if(mimeStr==='application/zip'){prev.style.display='none';prev.src=''}
-  else{prev.src=URL.createObjectURL(decBlob);prev.style.display='block'}
-  document.getElementById('dec-size').textContent=formatSize(file.size)
-  document.getElementById('dec-type').textContent=mimeStr
-  document.getElementById('dec-origname').textContent=origName
-  document.getElementById('dec-imgsize').textContent=formatSize(data.length)
+// ── Decode ───────────────────────────────────────────────────────────────────
+
+function decodePlain(bytes, offset) {
+  let o = offset
+  const mimeLen = (bytes[o]<<8)|bytes[o+1]; o+=2
+  const mimeStr = new TextDecoder().decode(bytes.slice(o,o+mimeLen)); o+=mimeLen
+  const nameLen = (bytes[o]<<8)|bytes[o+1]; o+=2
+  const origName = new TextDecoder().decode(bytes.slice(o,o+nameLen)); o+=nameLen
+  const data = bytes.slice(o)
+  decMime=mimeStr; decOrigName=origName
+  decBlob = new Blob([data],{type:mimeStr})
+  const prev = document.getElementById('dec-preview')
+  if(mimeStr==='application/zip'){prev.style.display='none'; prev.src=''}
+  else{prev.src=URL.createObjectURL(decBlob); prev.style.display='block'}
+  document.getElementById('dec-type').textContent    = mimeStr
+  document.getElementById('dec-origname').textContent = origName
+  document.getElementById('dec-imgsize').textContent  = formatSize(data.length)
   document.getElementById('dec-card').classList.add('visible')
-  document.getElementById('dec-btn').disabled=false
+  document.getElementById('dec-btn').disabled = false
   showStatus('dec','还原成功，文件完整无损','ok')
+}
+
+async function handleDecode(file) {
+  if(!file) return
+  const buf = await file.arrayBuffer()
+  const bytes = new Uint8Array(buf)
+  // Reset
+  pendingDecBytes = null; decBlob = null
+  document.getElementById('dec-pw-section').style.display = 'none'
+  document.getElementById('dec-card').classList.remove('visible')
+  document.getElementById('dec-btn').disabled = true
+
+  const isPlain = bytes[0]===0x49&&bytes[1]===0x4D&&bytes[2]===0x42&&bytes[3]===0x01
+  const isEnc   = bytes[0]===0x49&&bytes[1]===0x4D&&bytes[2]===0x42&&bytes[3]===0x02
+  if(!isPlain&&!isEnc){showStatus('dec','无效文件：不是由本工具生成的 .bin','err'); return}
+
+  document.getElementById('dec-size').textContent = formatSize(file.size)
+
+  if(isPlain) { decodePlain(bytes, 4); return }
+
+  // Encrypted file — show password prompt
+  pendingDecBytes = bytes
+  document.getElementById('dec-pw-section').style.display = 'flex'
+  document.getElementById('dec-pw').value = ''
+  document.getElementById('dec-pw').focus()
+  showStatus('dec','检测到加密文件，请输入密码后解密','ok')
+}
+
+async function doDecrypt() {
+  const pw = document.getElementById('dec-pw').value.trim()
+  if(!pw) {showStatus('dec','请输入密码','err'); return}
+  if(!pendingDecBytes) return
+  const bytes = pendingDecBytes
+  // Format: [MAGIC_ENC 4][Salt 16][IV 12][EncryptedPayload]
+  const salt      = bytes.slice(4, 20)
+  const iv        = bytes.slice(20, 32)
+  const encrypted = bytes.slice(32)
+  const btn = document.getElementById('dec-decrypt-btn')
+  btn.disabled = true; btn.textContent = '解密中…'
+  try {
+    const key      = await deriveKey(pw, salt)
+    const decrypted = new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv}, key, encrypted))
+    pendingDecBytes = null
+    document.getElementById('dec-pw-section').style.display = 'none'
+    decodePlain(decrypted, 0)
+  } catch {
+    showStatus('dec','密码错误，无法解密','err')
+  } finally {
+    btn.disabled = false; btn.textContent = '解密还原'
+  }
 }
 
 function downloadImg(){
   if(!decBlob) return
-  const a=document.createElement('a')
-  a.href=URL.createObjectURL(decBlob)
-  a.download=decOrigName||'restored_file'
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(decBlob)
+  a.download = decOrigName || 'restored_file'
   a.click()
 }
 
+// ── Event listeners ───────────────────────────────────────────────────────────
+
 ;['drop-encode','drop-decode'].forEach(id=>{
-  const el=document.getElementById(id)
+  const el = document.getElementById(id)
   if(!el) return
   el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('drag-over')})
   el.addEventListener('dragleave',()=>el.classList.remove('drag-over'))
   el.addEventListener('drop',e=>{
     e.preventDefault();el.classList.remove('drag-over')
-    const f=e.dataTransfer.files[0];if(!f) return
-    id==='drop-encode'?handleEncode(f):handleDecode(f)
+    const f=e.dataTransfer.files[0]; if(!f) return
+    id==='drop-encode' ? handleEncode(f) : handleDecode(f)
   })
+})
+
+// Re-encode when password changes (if file already loaded)
+document.getElementById('enc-pw').addEventListener('change',()=>{
+  if(encFile) handleEncode(encFile)
+})
+
+// Enter key triggers decrypt
+document.getElementById('dec-pw').addEventListener('keydown',e=>{
+  if(e.key==='Enter') doDecrypt()
 })
 </script>
 </body>
