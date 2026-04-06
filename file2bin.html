@@ -627,7 +627,7 @@ header {
         </div>
         <div class="dz-file-meta">
           <div class="dz-file-name" id="enc-drop-name">—</div>
-          <div class="dz-file-sub" id="enc-drop-sub">File loaded · Click to choose another file</div>
+          <div class="dz-file-sub" id="enc-drop-sub">已读取，点击可重新选择文件</div>
         </div>
       </div>
     </div>
@@ -705,7 +705,7 @@ header {
         </div>
         <div class="dz-file-meta">
           <div class="dz-file-name" id="dec-drop-name">—</div>
-          <div class="dz-file-sub" id="dec-drop-sub">File loaded · Click to choose another file</div>
+          <div class="dz-file-sub" id="dec-drop-sub">已读取，点击可重新选择文件</div>
         </div>
       </div>
     </div>
@@ -839,7 +839,7 @@ function revokeObjectUrl(url) {
   if(url) URL.revokeObjectURL(url)
 }
 
-function updateDropzoneState(zoneId, nameId, subId, file, subtitlePrefix='Loaded') {
+function updateDropzoneState(zoneId, nameId, subId, file, subtitlePrefix='已读取') {
   const zone = document.getElementById(zoneId)
   if(!zone) return
   if(!file) {
@@ -850,15 +850,15 @@ function updateDropzoneState(zoneId, nameId, subId, file, subtitlePrefix='Loaded
   const nameEl = document.getElementById(nameId)
   const subEl = document.getElementById(subId)
   if(nameEl) nameEl.textContent = file.name
-  if(subEl) subEl.textContent = `${subtitlePrefix} · ${formatSize(file.size)} · Click to choose another file`
+  if(subEl) subEl.textContent = `${subtitlePrefix} · ${formatSize(file.size)} · 点击可重新选择文件`
 }
 
 function updateEncodeDropzone(file) {
-  updateDropzoneState('drop-encode', 'enc-drop-name', 'enc-drop-sub', file, 'Read')
+  updateDropzoneState('drop-encode', 'enc-drop-name', 'enc-drop-sub', file, '已读取')
 }
 
 function updateDecodeDropzone(file) {
-  updateDropzoneState('drop-decode', 'dec-drop-name', 'dec-drop-sub', file, 'Loaded')
+  updateDropzoneState('drop-decode', 'dec-drop-name', 'dec-drop-sub', file, '已载入')
 }
 
 // ── Encode ───────────────────────────────────────────────────────────────────
