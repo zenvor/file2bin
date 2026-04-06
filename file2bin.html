@@ -826,10 +826,9 @@ async function downloadBin(){
   // race conditions where the change event fires before async encryption finishes
   await handleEncode(encFile)
   if(!encBuffer) return
-  const pw = document.getElementById('enc-pw').value.trim()
   const a = document.createElement('a')
   a.href = URL.createObjectURL(new Blob([encBuffer],{type:'application/octet-stream'}))
-  a.download = encOrigName.replace(/\.[^.]+$/,'') + (pw ? '_encrypted' : '') + '.bin'
+  a.download = document.getElementById('enc-outname').textContent
   a.click()
 }
 
