@@ -814,6 +814,8 @@ async function handleEncode(file) {
   const prev = document.getElementById('enc-preview')
   revokeObjectUrl(encPreviewUrl)
   encPreviewUrl = null
+  revokeObjectUrl(encDownloadUrl)
+  encDownloadUrl = null
   if(isZip){prev.style.display='none'; prev.src=''}
   else{
     encPreviewUrl = URL.createObjectURL(file)
