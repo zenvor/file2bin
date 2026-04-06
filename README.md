@@ -2,6 +2,8 @@
 
 `file2bin` is a single-file web app (`file2bin.html`) that converts files to and from `.bin` (hex), with optional browser-side encryption.
 
+Current UI language: Chinese (zh-CN).
+
 ## Features
 
 - Single-file app: HTML, CSS, and JavaScript are all in `file2bin.html`
@@ -15,12 +17,15 @@
 ## Requirements
 
 - A modern browser with Web Crypto API support
+- Secure Context is required for encryption/decryption (`https://` or `http://localhost`)
 
 ## Quick Start
 
 ### Option 1: Open directly
 
 Open `file2bin.html` in your browser.
+
+> Note: On `file://`, encryption/decryption may be unavailable in some browsers because `crypto.subtle` requires a Secure Context.
 
 ### Option 2: Serve locally
 
