@@ -1,6 +1,6 @@
 # file2bin
 
-`file2bin` is a single-file web tool (`file2bin.html`) for converting files to and from `.bin` (hex), with optional browser-side encryption.
+`file2bin` is a single-file web app (`file2bin.html`) that converts files to and from `.bin` (hex), with optional browser-side encryption.
 
 ## Features
 
@@ -14,9 +14,9 @@
 
 ## Requirements
 
-- A modern browser with Web Crypto API support (Chrome, Edge, Safari, Firefox)
+- A modern browser with Web Crypto API support
 
-## Usage
+## Quick Start
 
 ### Option 1: Open directly
 
@@ -30,20 +30,25 @@ python3 -m http.server 8080
 
 Then visit <http://localhost:8080/file2bin.html>.
 
-## Notes
+## Security & Privacy Notes
 
-- Processing is done locally in your browser; files are not uploaded by this app.
-- Use a strong password for encryption.
-- If you forget the password, encrypted content cannot be recovered.
+- File processing is local to your browser session.
+- Use a strong password when enabling encryption.
+- If you lose the password, encrypted data cannot be recovered.
+
+## Limitations
+
+- Very large files may consume significant browser memory.
+- This project currently has no automated tests.
 
 ## Project Structure
 
 ```text
 .
 ├── file2bin.html   # main app (runtime file)
-├── DESIGN.md       # design reference document
-├── LICENSE
-└── README.md
+├── README.md
+├── .gitignore
+└── LICENSE
 ```
 
 ## License
