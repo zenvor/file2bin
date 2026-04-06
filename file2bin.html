@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FILE·BIN</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #ffffff;
+  --bg-subtle: #f7f7f5;
+  --bg-hover: #f1f1ef;
+  --border: #e8e8e6;
+  --border-focus: #b8b8b4;
+  --text: #1a1a1a;
+  --text-2: #787774;
+  --text-3: #b0b0ab;
+  --accent: #2383e2;
+  --accent-bg: #eef5fd;
+  --accent-border: #c5ddf7;
+  --green: #0f7b6c;
+  --green-bg: #eefaf7;
+  --red: #e03e3e;
+  --red-bg: #fdf2f2;
+  --radius: 8px;
+  --radius-sm: 6px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 64px 24px 96px;
+}
+
+/* ── Header ── */
+header {
+  margin-bottom: 40px;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-3);
+  margin-bottom: 28px;
+  font-weight: 400;
+}
+
+.breadcrumb span { color: var(--text-3); }
+.breadcrumb a { color: var(--text-2); text-decoration: none; }
+
+.page-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.page-title {
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  color: var(--text);
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+
+.page-desc {
+  font-size: 14px;
+  color: var(--text-2);
+  font-weight: 400;
+}
+
+/* ── Divider ── */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 28px 0;
+}
+
+/* ── Tabs ── */
+.tabs {
+  display: flex;
+  gap: 2px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 3px;
+  margin-bottom: 20px;
+}
+
+.tab {
+  flex: 1;
+  padding: 7px 12px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all 0.12s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.tab:hover { color: var(--text); background: var(--bg-hover); }
+
+.tab.active {
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 0 0 1px var(--border);
+}
+
+.tab svg { flex-shrink: 0; }
+
+/* ── Panel ── */
+.panel { display: none; }
+.panel.active {
+  display: block;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Drop zone ── */
+.dropzone {
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 36px 24px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.12s;
+  background: var(--bg);
+}
+
+.dropzone:hover, .dropzone.drag-over {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.dropzone input[type=file] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+.dz-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+  transition: all 0.12s;
+}
+
+.dropzone:hover .dz-icon, .dropzone.drag-over .dz-icon {
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+}
+
+.dz-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.dz-sub {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+/* ── Result card ── */
+.result-card {
+  margin-top: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: none;
+  animation: fadeIn 0.15s ease;
+}
+.result-card.visible { display: block; }
+
+.rc-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--bg-subtle);
+  border-bottom: 1px solid var(--border);
+}
+
+.rc-head-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-2);
+}
+
+.rc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--green);
+  background: var(--green-bg);
+  border: 1px solid #b8ede5;
+  border-radius: 4px;
+  padding: 1px 7px;
+}
+
+.rc-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+}
+
+.rc-body { padding: 14px; }
+
+.img-preview {
+  width: 100%;
+  max-height: 160px;
+  object-fit: contain;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  margin-bottom: 12px;
+  display: none;
+  background: var(--bg-subtle);
+}
+
+/* Meta rows */
+.meta-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.meta-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.meta-row:last-child { border-bottom: none; }
+
+.meta-key {
+  font-size: 12px;
+  color: var(--text-3);
+  font-weight: 400;
+  width: 80px;
+  flex-shrink: 0;
+}
+
+.meta-val {
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 400;
+  word-break: break-all;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hex block */
+.hex-block {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  max-height: 76px;
+  position: relative;
+}
+
+.hex-block::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 24px;
+  background: linear-gradient(transparent, var(--bg-subtle));
+  pointer-events: none;
+}
+
+.hex-label {
+  font-size: 11px;
+  color: var(--text-3);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 5px;
+}
+
+.hex-content {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 11px;
+  color: var(--text-2);
+  word-break: break-all;
+  line-height: 1.8;
+}
+
+/* ── Button ── */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 16px;
+  background: var(--text);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.12s;
+}
+
+.btn:hover { opacity: 0.85; }
+.btn:active { opacity: 0.7; }
+.btn:disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
+
+/* ── Status ── */
+.status {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+
+.status.ok  {
+  display: flex;
+  background: var(--green-bg);
+  border: 1px solid #b8ede5;
+  color: var(--green);
+}
+
+.status.err {
+  display: flex;
+  background: var(--red-bg);
+  border: 1px solid #f5c5c5;
+  color: var(--red);
+}
+
+/* ── Callout block ── */
+.callout {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-top: 28px;
+}
+
+.callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+.callout-body { flex: 1; }
+
+.callout-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.callout-text {
+  font-size: 12px;
+  color: var(--text-2);
+  line-height: 1.6;
+}
+
+/* ── Toggle / How ── */
+.toggle-wrap {
+  margin-top: 10px;
+}
+
+.toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-2);
+  cursor: pointer;
+  padding: 4px 0;
+  width: 100%;
+  text-align: left;
+  transition: color 0.12s;
+}
+
+.toggle-btn:hover { color: var(--text); }
+
+.toggle-btn svg {
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+
+.toggle-btn.open svg { transform: rotate(90deg); }
+
+.toggle-body {
+  display: none;
+  padding: 12px 0 4px 22px;
+}
+
+.toggle-body.open { display: block; }
+
+.toggle-body p {
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+
+.toggle-body p:last-child { margin-bottom: 0; }
+
+@media (max-width: 480px) {
+  .page { padding: 40px 16px 80px; }
+  .page-title { font-size: 24px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <header>
+    <div class="breadcrumb">
+      <span>工具</span>
+      <span>/</span>
+      <span>FILE·BIN</span>
+    </div>
+    <div class="page-icon">🔐</div>
+    <div class="page-title">FILE·BIN</div>
+    <div class="page-desc">将文件转为二进制 .bin 格式保存，随时还原。全程本地处理，零上传。</div>
+  </header>
+
+  <div class="divider"></div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" id="tab-enc" onclick="switchTab('encode')">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+        <path d="M6.5 1v8M3 6l3.5 3.5L10 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M1 10.5h11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      文件 → .bin 转换
+    </button>
+    <button class="tab" id="tab-dec" onclick="switchTab('decode')">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+        <path d="M6.5 12V4M3 7l3.5-3.5L10 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M1 2.5h11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      .bin → 文件 还原
+    </button>
+  </div>
+
+  <!-- Encode Panel -->
+  <div class="panel active" id="panel-encode">
+
+    <div class="dropzone" id="drop-encode">
+      <input type="file" accept="image/*,.zip,application/zip" onchange="handleEncode(this.files[0])">
+      <div class="dz-icon">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M9 12V4M5.5 7.5 9 4l3.5 3.5" stroke="#787774" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2 13.5v.5a1 1 0 001 1h12a1 1 0 001-1v-.5" stroke="#787774" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="dz-title">点击上传或拖入文件</div>
+      <div class="dz-sub">支持图片（JPG、PNG、WebP 等）和 ZIP 压缩包</div>
+    </div>
+
+    <div class="result-card" id="enc-card">
+      <div class="rc-head">
+        <div class="rc-head-left">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <rect x="1" y="1" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M4 6.5h5M6.5 4v5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          文件信息
+        </div>
+        <div class="rc-badge"><span class="rc-dot"></span>已读取</div>
+      </div>
+      <div class="rc-body">
+        <img class="img-preview" id="enc-preview" alt="preview">
+        <div class="meta-list">
+          <div class="meta-row"><span class="meta-key">文件名</span><span class="meta-val" id="enc-name">—</span></div>
+          <div class="meta-row"><span class="meta-key">大小</span><span class="meta-val" id="enc-size">—</span></div>
+          <div class="meta-row"><span class="meta-key">类型</span><span class="meta-val" id="enc-type">—</span></div>
+          <div class="meta-row"><span class="meta-key">输出名</span><span class="meta-val" id="enc-outname">—</span></div>
+        </div>
+        <div class="hex-block">
+          <div class="hex-label">Hex Preview</div>
+          <div class="hex-content" id="enc-hex"></div>
+        </div>
+        <button class="btn" id="enc-btn" onclick="downloadBin()" disabled>
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <path d="M6.5 1v8M3 6.5l3.5 3.5 3.5-3.5" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M1 10.5h11" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+          下载 .bin 文件
+        </button>
+      </div>
+    </div>
+    <div class="status" id="enc-status">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 7l2 2 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span id="enc-status-text"></span>
+    </div>
+
+  </div>
+
+  <!-- Decode Panel -->
+  <div class="panel" id="panel-decode">
+
+    <div class="dropzone" id="drop-decode">
+      <input type="file" accept=".bin" onchange="handleDecode(this.files[0])">
+      <div class="dz-icon">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <rect x="2" y="1.5" width="10" height="13" rx="1.5" stroke="#787774" stroke-width="1.4"/>
+          <path d="M5 5.5h4M5 8h4M5 10.5h2" stroke="#787774" stroke-width="1.2" stroke-linecap="round"/>
+          <circle cx="13.5" cy="13.5" r="3" stroke="#787774" stroke-width="1.4"/>
+          <path d="M13.5 12v3M12 13.5l1.5 1.5 1.5-1.5" stroke="#787774" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="dz-title">点击上传或拖入 .bin 文件</div>
+      <div class="dz-sub">仅支持由本工具生成的 .bin 文件，可还原图片或 ZIP</div>
+    </div>
+
+    <div class="result-card" id="dec-card">
+      <div class="rc-head">
+        <div class="rc-head-left">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <rect x="1" y="1" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M4 6.5h5M6.5 4v5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          还原信息
+        </div>
+        <div class="rc-badge"><span class="rc-dot"></span>还原成功</div>
+      </div>
+      <div class="rc-body">
+        <img class="img-preview" id="dec-preview" alt="restored">
+        <div class="meta-list">
+          <div class="meta-row"><span class="meta-key">.bin 大小</span><span class="meta-val" id="dec-size">—</span></div>
+          <div class="meta-row"><span class="meta-key">文件类型</span><span class="meta-val" id="dec-type">—</span></div>
+          <div class="meta-row"><span class="meta-key">原文件名</span><span class="meta-val" id="dec-origname">—</span></div>
+          <div class="meta-row"><span class="meta-key">字节数</span><span class="meta-val" id="dec-imgsize">—</span></div>
+        </div>
+        <button class="btn" id="dec-btn" onclick="downloadImg()" disabled>
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <path d="M6.5 1v8M3 6.5l3.5 3.5 3.5-3.5" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M1 10.5h11" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+          下载还原的文件
+        </button>
+      </div>
+    </div>
+    <div class="status" id="dec-status">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 7l2 2 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span id="dec-status-text"></span>
+    </div>
+
+  </div>
+
+  <!-- Callout -->
+  <div class="callout" style="margin-top:28px;">
+    <div class="callout-icon">🔒</div>
+    <div class="callout-body">
+      <div class="callout-title">完全本地处理</div>
+      <div class="callout-text">所有操作在浏览器内完成，文件不会上传至任何服务器。.bin 文件无法被系统识别为图片或压缩包，适合作为简单的隐私保护手段。</div>
+    </div>
+  </div>
+
+  <!-- Toggle: how it works -->
+  <div class="toggle-wrap">
+    <div class="divider" style="margin:20px 0 12px;"></div>
+    <button class="toggle-btn" onclick="toggleHow(this)">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      工作原理
+    </button>
+    <div class="toggle-body" id="how-body">
+      <p>转换时读取文件的原始字节，在头部写入 4 字节魔术标识 + MIME 类型 + 原始文件名，最后拼接文件数据，输出为 .bin 文件。</p>
+      <p>还原时读取 .bin 头部信息，解析出原始文件类型和文件名，提取数据字节并重建为原始文件，全程无损。</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const MAGIC = new Uint8Array([0x49,0x4D,0x42,0x01])
+let encBuffer=null,encMime=null,encOrigName=null
+let decBlob=null,decMime=null,decOrigName=null
+
+function switchTab(tab) {
+  const isEnc = tab==='encode'
+  document.getElementById('tab-enc').classList.toggle('active',isEnc)
+  document.getElementById('tab-dec').classList.toggle('active',!isEnc)
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'))
+  document.getElementById('panel-'+tab).classList.add('active')
+}
+
+function toggleHow(btn) {
+  btn.classList.toggle('open')
+  document.getElementById('how-body').classList.toggle('open')
+}
+
+function formatSize(b){
+  if(b<1024) return b+' B'
+  if(b<1048576) return (b/1024).toFixed(1)+' KB'
+  return (b/1048576).toFixed(2)+' MB'
+}
+
+function toHex(bytes){
+  return Array.from(bytes.slice(0,96)).map(b=>b.toString(16).padStart(2,'0').toUpperCase()).join(' ')
+}
+
+function showStatus(panel, msg, type) {
+  const el = document.getElementById(panel+'-status')
+  const txt = document.getElementById(panel+'-status-text')
+  el.className = 'status '+type
+  txt.textContent = msg
+}
+
+async function handleEncode(file){
+  if(!file) return
+  const buf=await file.arrayBuffer()
+  const bytes=new Uint8Array(buf)
+  encOrigName=file.name
+  const isZip=encOrigName.toLowerCase().endsWith('.zip')
+  encMime=isZip?'application/zip':(file.type||'application/octet-stream')
+  const mimeB=new TextEncoder().encode(encMime)
+  const nameB=new TextEncoder().encode(encOrigName)
+  const out=new Uint8Array(4+2+mimeB.length+2+nameB.length+bytes.length)
+  let o=0
+  out.set(MAGIC,o);o+=4
+  out[o++]=(mimeB.length>>8)&0xff;out[o++]=mimeB.length&0xff
+  out.set(mimeB,o);o+=mimeB.length
+  out[o++]=(nameB.length>>8)&0xff;out[o++]=nameB.length&0xff
+  out.set(nameB,o);o+=nameB.length
+  out.set(bytes,o)
+  encBuffer=out
+  const prev=document.getElementById('enc-preview')
+  if(isZip){prev.style.display='none';prev.src=''}
+  else{prev.src=URL.createObjectURL(file);prev.style.display='block'}
+  const base=encOrigName.replace(/\.[^.]+$/,'')
+  document.getElementById('enc-name').textContent=encOrigName
+  document.getElementById('enc-size').textContent=formatSize(file.size)
+  document.getElementById('enc-type').textContent=isZip?'application/zip':encMime
+  document.getElementById('enc-outname').textContent=base+'_encrypted.bin'
+  document.getElementById('enc-hex').textContent=toHex(out)
+  document.getElementById('enc-card').classList.add('visible')
+  document.getElementById('enc-btn').disabled=false
+  showStatus('enc','已解析，点击下载 .bin 文件','ok')
+}
+
+function downloadBin(){
+  if(!encBuffer) return
+  const a=document.createElement('a')
+  a.href=URL.createObjectURL(new Blob([encBuffer],{type:'application/octet-stream'}))
+  a.download=encOrigName.replace(/\.[^.]+$/,'')+'_encrypted.bin'
+  a.click()
+}
+
+async function handleDecode(file){
+  if(!file) return
+  const buf=await file.arrayBuffer()
+  const bytes=new Uint8Array(buf)
+  if(bytes[0]!==0x49||bytes[1]!==0x4D||bytes[2]!==0x42||bytes[3]!==0x01){
+    showStatus('dec','无效文件：不是由本工具生成的 .bin','err'); return
+  }
+  let o=4
+  const mimeLen=(bytes[o]<<8)|bytes[o+1];o+=2
+  const mimeStr=new TextDecoder().decode(bytes.slice(o,o+mimeLen));o+=mimeLen
+  const nameLen=(bytes[o]<<8)|bytes[o+1];o+=2
+  const origName=new TextDecoder().decode(bytes.slice(o,o+nameLen));o+=nameLen
+  const data=bytes.slice(o)
+  decMime=mimeStr;decOrigName=origName
+  decBlob=new Blob([data],{type:mimeStr})
+  const prev=document.getElementById('dec-preview')
+  if(mimeStr==='application/zip'){prev.style.display='none';prev.src=''}
+  else{prev.src=URL.createObjectURL(decBlob);prev.style.display='block'}
+  document.getElementById('dec-size').textContent=formatSize(file.size)
+  document.getElementById('dec-type').textContent=mimeStr
+  document.getElementById('dec-origname').textContent=origName
+  document.getElementById('dec-imgsize').textContent=formatSize(data.length)
+  document.getElementById('dec-card').classList.add('visible')
+  document.getElementById('dec-btn').disabled=false
+  showStatus('dec','还原成功，文件完整无损','ok')
+}
+
+function downloadImg(){
+  if(!decBlob) return
+  const a=document.createElement('a')
+  a.href=URL.createObjectURL(decBlob)
+  a.download=decOrigName||'restored_file'
+  a.click()
+}
+
+;['drop-encode','drop-decode'].forEach(id=>{
+  const el=document.getElementById(id)
+  if(!el) return
+  el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('drag-over')})
+  el.addEventListener('dragleave',()=>el.classList.remove('drag-over'))
+  el.addEventListener('drop',e=>{
+    e.preventDefault();el.classList.remove('drag-over')
+    const f=e.dataTransfer.files[0];if(!f) return
+    id==='drop-encode'?handleEncode(f):handleDecode(f)
+  })
+})
+</script>
+</body>
+</html>
